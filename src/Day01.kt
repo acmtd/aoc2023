@@ -1,22 +1,22 @@
 fun main() {
-    fun convertToDigit(str: String): String {
-        if (str.length == 1) return str
+    fun convertToDigit(str: String): Int {
+        if (str.length == 1) return str.toInt()
 
-        if (str == "one") return "1"
-        if (str == "two") return "2"
-        if (str == "three") return "3"
-        if (str == "four") return "4"
-        if (str == "five") return "5"
-        if (str == "six") return "6"
-        if (str == "seven") return "7"
-        if (str == "eight") return "8"
-        return "9"
+        if (str == "one") return 1
+        if (str == "two") return 2
+        if (str == "three") return 3
+        if (str == "four") return 4
+        if (str == "five") return 5
+        if (str == "six") return 6
+        if (str == "seven") return 7
+        if (str == "eight") return 8
+        return 9
     }
 
-    fun convertToDigits(str: String): String {
+    fun convertToDigits(str: String): Sequence<Int> {
         return Regex("(?=(\\d|one|two|three|four|five|six|seven|eight|nine))")
             .findAll(str)
-            .joinToString { convertToDigit(it.groups[1]?.value ?: "") }
+            .map { convertToDigit(it.groups[1]?.value ?: "") }
     }
 
     fun part1(input: List<String>): Int {
@@ -25,8 +25,7 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return input.map { convertToDigits(it) }
-            .sumOf { it.first().digitToInt() * 10 + it.last().digitToInt() }
+        return input.map { convertToDigits(it) }.sumOf { it.first() * 10 + it.last() }
     }
 
     val testInput = readInput("Day01_test")
