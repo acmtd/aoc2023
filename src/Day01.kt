@@ -1,22 +1,17 @@
 fun main() {
-    fun convertToDigit(str: String): Int {
+    val numberMap = mapOf("one" to 1, "two" to 2, "three" to 3, "four" to 4, "five" to 5,
+        "six" to 6, "seven" to 7, "eight" to 8, "nine" to 9)
+
+    fun convertToDigit(str: String): Int? {
         if (str.length == 1) return str.toInt()
 
-        if (str == "one") return 1
-        if (str == "two") return 2
-        if (str == "three") return 3
-        if (str == "four") return 4
-        if (str == "five") return 5
-        if (str == "six") return 6
-        if (str == "seven") return 7
-        if (str == "eight") return 8
-        return 9
+        return numberMap[str]
     }
 
     fun convertToDigits(str: String): Sequence<Int> {
         return Regex("(?=(\\d|one|two|three|four|five|six|seven|eight|nine))")
             .findAll(str)
-            .map { convertToDigit(it.groups[1]?.value ?: "") }
+            .mapNotNull { convertToDigit(it.groups[1]?.value ?: "") }
     }
 
     fun part1(input: List<String>): Int {
