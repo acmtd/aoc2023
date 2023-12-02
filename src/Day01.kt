@@ -10,7 +10,9 @@ fun main() {
 
     fun convertToDigits(str: String): Sequence<Int> {
         return Regex("(?=(\\d|one|two|three|four|five|six|seven|eight|nine))")
-            .findAll(str).map { convertToDigit(it.groups[1]!!.value) }
+            .findAll(str)
+            .mapNotNull { it.groups[1] }
+            .map { convertToDigit(it.value) }
     }
 
     fun part1(input: List<String>): Int {
