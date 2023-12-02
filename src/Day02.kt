@@ -1,16 +1,12 @@
 fun main() {
     val colors = listOf("red", "green", "blue")
 
-    fun colorValue(data: String, color: String): Int {
+    fun colorCount(data: String, color: String): Int {
         val find = Regex("(\\d+) $color").find(data) ?: return 0
         return find.groups[1]!!.value.toInt()
     }
 
-    fun moves(data: String): List<Int> {
-        return colors.map { colorValue(data, it) }
-    }
-
-    fun illegalMove(rgb: List<Int>, rgbMax: List<Int>): Boolean {
+    fun illegalBag(rgb: List<Int>, rgbMax: List<Int>): Boolean {
         for ((index, value) in rgb.withIndex()) {
             if (value > rgbMax[index]) return true
         }
@@ -18,24 +14,27 @@ fun main() {
         return false
     }
 
-    fun minimumCubesForGame(data: String): Int {
-        val items = data.split(";", ":")
-        val moves = items.drop(1).map { x -> moves(x) }
+    fun String.cubeCombos(): List<Int> {
+        return colors.map { colorCount(this, it) }
+    }
 
-        val redMin = moves.maxOf { it[0] }
-        val greenMin = moves.maxOf { it[1] }
-        val blueMin = moves.maxOf { it[2] }
+    fun bagsOfCubes(data: String): List<List<Int>> {
+        return data.substringAfter(":").split(";").map { it.cubeCombos() }
+    }
 
-        return redMin * greenMin * blueMin
+    fun minimumCubesProduct(data: String): Int {
+        val bags = bagsOfCubes(data)
+
+        return listOf(bags.maxOf { it[0] },
+            bags.maxOf { it[1] },
+            bags.maxOf { it[2] })
+            .reduce(Int::times)
     }
 
     fun legalGameNumbers(data: String, rgbMax: List<Int>): Int {
-        val items = data.split(";", ":")
-        val moves = items.drop(1).map { x -> moves(x) }
+        if (bagsOfCubes(data).any { m -> illegalBag(m, rgbMax) }) return 0
 
-        if (moves.any { m -> illegalMove(m, rgbMax) }) return 0
-
-        return items.first().replace(Regex("\\D"), "").toInt()
+        return data.substringBefore(":").substringAfter("Game ").toInt()
     }
 
     fun part1(games: List<String>): Int {
@@ -43,7 +42,7 @@ fun main() {
     }
 
     fun part2(games: List<String>): Int {
-        return games.sumOf { minimumCubesForGame(it) }
+        return games.sumOf { minimumCubesProduct(it) }
     }
 
     val testInput = readInput("Day02_test")
