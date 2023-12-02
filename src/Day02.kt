@@ -18,27 +18,25 @@ fun main() {
         return colors.map { colorCount(this, it) }
     }
 
+    fun String.gameNumber(): Int {
+        return this.substringBefore(":").substringAfter("Game ").toInt()
+    }
+
     fun bagsOfCubes(data: String): List<List<Int>> {
         return data.substringAfter(":").split(";").map { it.cubeCombos() }
     }
 
     fun minimumCubesProduct(data: String): Int {
         val bags = bagsOfCubes(data)
-
-        return listOf(bags.maxOf { it[0] },
-            bags.maxOf { it[1] },
-            bags.maxOf { it[2] })
-            .reduce(Int::times)
+        return bags.maxOf { it[0] } * bags.maxOf { it[1] } * bags.maxOf { it[2] }
     }
 
-    fun legalGameNumbers(data: String, rgbMax: List<Int>): Int {
-        if (bagsOfCubes(data).any { m -> illegalBag(m, rgbMax) }) return 0
-
-        return data.substringBefore(":").substringAfter("Game ").toInt()
+    fun legalGame(data: String, rgbMax: List<Int>): Boolean {
+        return bagsOfCubes(data).all { !illegalBag(it, rgbMax) }
     }
 
     fun part1(games: List<String>): Int {
-        return games.sumOf { legalGameNumbers(it, listOf(12, 13, 14)) }
+        return games.filter { legalGame(it, listOf(12, 13, 14)) }.sumOf { it.gameNumber() }
     }
 
     fun part2(games: List<String>): Int {
