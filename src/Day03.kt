@@ -1,75 +1,15 @@
 fun main() {
     fun isDigitAdjacentToSymbol(pos: Position, symbolPositions: List<Position>, length: Int): Boolean {
         // pos indicates start position, get all positions by adding the length
-        val digitPositions = mutableListOf<Position>()
-
-        for (i in 0..<length) {
-            digitPositions.add(Position(pos.row, pos.col + i))
-        }
-
-        return symbolPositions.any { s ->
-            digitPositions.any { it.isAdjacent(s) }
-        }
-    }
-
-    fun part1(rows: List<String>): Int {
-        val digitPositions = mutableMapOf<Position, Int>()
-        val symbolPositions = mutableListOf<Position>()
-
-        rows.forEachIndexed { rowIdx, row ->
-            var digitPos: Position? = null
-
-            row.forEachIndexed { colIdx, col ->
-                val pos = Position(rowIdx, colIdx)
-
-                if (col.isDigit()) {
-                    if (digitPos == null) {
-                        digitPositions[pos] = col.digitToInt()
-                        digitPos = pos
-                    } else {
-                        digitPositions[digitPos!!] = (digitPositions[digitPos]?.times(10) ?: 0) + col.digitToInt()
-                    }
-                } else if (col == '.') {
-                    // ignore dots
-                    digitPos = null
-                } else {
-                    symbolPositions.add(pos)
-                    digitPos = null
-                }
+        val digitPositions = buildList<Position> {
+            for (i in 0..<length) {
+                add(Position(pos.row, pos.col + i))
             }
         }
-
-        var result = 0
-
-        digitPositions.forEach { (position, value) ->
-            if (isDigitAdjacentToSymbol(position, symbolPositions, value.toString().length)) {
-                println("Position  $position is adjacent")
-                result += value
-            } else {
-                println("Position $position is not adjacent")
-            }
-        }
-
-        return result
+        return symbolPositions.any { s -> digitPositions.any { it.isAdjacent(s) } }
     }
 
-    fun getGearRatio(gp: Position, digitPositions: Map<Position, Int>) : Int {
-        val listOfParts = mutableListOf<Int>()
-
-        digitPositions.forEach { (dp, value) ->
-            if (isDigitAdjacentToSymbol(dp, listOf(gp), value.toString().length)) {
-                listOfParts.add(value)
-            }
-
-            if (listOfParts.size > 2) return 0
-        }
-
-        if (listOfParts.size < 2) return 0
-
-        return listOfParts[0] * listOfParts[1]
-    }
-
-    fun part2(rows: List<String>): Int {
+    fun buildDataStructure(rows: List<String>, part2: Boolean): Pair<MutableMap<Position, Int>, MutableList<Position>> {
         val digitPositions = mutableMapOf<Position, Int>()
         val symbolPositions = mutableListOf<Position>()
         val gearPositions = mutableListOf<Position>()
@@ -87,22 +27,60 @@ fun main() {
                     } else {
                         digitPositions[digitPos!!] = (digitPositions[digitPos]?.times(10) ?: 0) + col.digitToInt()
                     }
-                } else if (col == '.') {
-                    // ignore dots
-                    digitPos = null
                 } else {
-                    symbolPositions.add(pos)
                     digitPos = null
 
-                    // could also be a gear
-                    if (col == '*') gearPositions.add(pos)
+                    if (col != '.') {
+                        symbolPositions.add(pos)
+
+                        // could also be a gear
+                        if (col == '*') gearPositions.add(pos)
+                    }
                 }
             }
         }
 
-        val result = gearPositions.sumOf { getGearRatio(it, digitPositions)}
+        if (part2) {
+            return Pair(digitPositions, gearPositions)
+        }
 
-        return result
+        return Pair(digitPositions, symbolPositions)
+    }
+
+    fun getGearRatio(gp: Position, digitPositions: Map<Position, Int>): Int {
+        val listOfParts = mutableListOf<Int>()
+
+        digitPositions.forEach { (dp, value) ->
+            if (isDigitAdjacentToSymbol(dp, listOf(gp), value.toString().length)) {
+                listOfParts.add(value)
+            }
+
+            if (listOfParts.size > 2) return 0
+        }
+
+        if (listOfParts.size < 2) return 0
+
+        return listOfParts[0] * listOfParts[1]
+    }
+
+    fun part1(rows: List<String>): Int {
+        val (digitPositions, symbolPositions) = buildDataStructure(rows, false)
+
+        return digitPositions.filter { (position, value) ->
+            isDigitAdjacentToSymbol(
+                position,
+                symbolPositions,
+                value.toString().length
+            )
+        }
+            .map { (_, value) -> value }
+            .sum()
+    }
+
+    fun part2(rows: List<String>): Int {
+        val (digitPositions, gearPositions) = buildDataStructure(rows, true)
+
+        return gearPositions.sumOf { getGearRatio(it, digitPositions) }
     }
 
     val testInput = readInput("Day03_test")
