@@ -1,7 +1,7 @@
 fun main() {
     fun isDigitAdjacentToSymbol(pos: Position, symbolPositions: List<Position>, length: Int): Boolean {
         // pos indicates start position, get all positions by adding the length
-        val digitPositions = buildList<Position> {
+        val digitPositions = buildList {
             for (i in 0..<length) {
                 add(Position(pos.row, pos.col + i))
             }
