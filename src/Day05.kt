@@ -1,4 +1,5 @@
 import java.io.File
+import kotlin.time.measureTime
 
 fun main() {
     fun String.digits(): List<Long> = this.split(" ").filter { it.isNotEmpty() }.map { it.toLong() }
@@ -54,6 +55,12 @@ fun main() {
     check(part2(testInput) == 46.toLong())
 
     val input = File("data", "Day05.txt").readText().split("\n\n")
-    part1(input).println() // 462648396
-    part2(input).println() // 2520479
+
+    measureTime {
+        part1(input).println() // 462648396
+    }.also { it.println() } // 2.8ms
+
+    measureTime {
+        part2(input).println() // 2520479
+    }.also { it.println() } // 826ms
 }
