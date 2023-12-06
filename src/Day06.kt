@@ -1,9 +1,7 @@
 fun main() {
-    fun permutations(time: Long): List<Long> = (0..time).map { speed -> speed * (time - speed) }
+    fun permutations(time: Long): List<Long> = (1..<time).map { speed -> speed * (time - speed) }
 
     fun part1(input: List<String>): Int {
-        check(input.size == 2)
-
         val times = input.first().removePrefix("Time:")
             .split(' ').filter { it.isNotBlank() }.map { it.toInt() }
 
@@ -15,8 +13,8 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        val time = input.first().removePrefix("Time:").filter { it.isDigit() }.toLong()
-        val record = input.last().removePrefix("Distance:").filter { it.isDigit() }.toLong()
+        val time = input.first().filter { it.isDigit() }.toLong()
+        val record = input.last().filter { it.isDigit() }.toLong()
 
         return permutations(time).count { it > record }
     }
