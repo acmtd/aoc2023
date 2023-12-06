@@ -1,6 +1,24 @@
+import kotlin.math.sqrt
 import kotlin.time.measureTime
 fun main() {
     fun permutations(time: Long): List<Long> = (1..<time).map { speed -> speed * (time - speed) }
+
+    fun quadraticWins(time: Long, record: Long): Int {
+        // if (speed * (time - speed)) > record
+        // ST - S^2 > record
+        // -S^2 + ST - record > 0
+        // ax^2 + bx + c = 0
+        // a = -1, b = T, c = -record
+        // -b +/- sqrt(b^2 - 4ac)/2a
+
+        val a = -1
+        val b = time.toDouble()
+        val c = -record.toDouble()
+
+        val root = sqrt(b*b - (4*a*c))
+
+        return root.toInt()
+    }
 
     fun part1(input: List<String>): Int {
         val times = input.first().removePrefix("Time:")
@@ -17,7 +35,8 @@ fun main() {
         val time = input.first().filter { it.isDigit() }.toLong()
         val record = input.last().filter { it.isDigit() }.toLong()
 
-        return permutations(time).count { it > record }
+        return quadraticWins(time, record)
+//        return permutations(time).count { it > record }
     }
 
     val testInput = readInput("Day06_test")
@@ -34,5 +53,5 @@ fun main() {
 
     measureTime {
         part2(input).println() // 38017587
-    }.also { it.println() } // 1.5s
+    }.also { it.println() } // 1.5s for bruteforce, 49us for quadratic
 }
