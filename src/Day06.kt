@@ -1,3 +1,4 @@
+import kotlin.time.measureTime
 fun main() {
     fun permutations(time: Long): List<Long> = (1..<time).map { speed -> speed * (time - speed) }
 
@@ -26,6 +27,12 @@ fun main() {
     check(part2(testInput2) == 71503)
 
     val input = readInput("Day06")
-    part1(input).println() // 4403592
-    part2(input).println() // 38017587
+
+    measureTime {
+        part1(input).println() // 4403592
+    }.also { it.println() } // 890us
+
+    measureTime {
+        part2(input).println() // 38017587
+    }.also { it.println() } // 1.5s
 }
