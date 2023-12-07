@@ -1,3 +1,5 @@
+import kotlin.time.measureTime
+
 fun main() {
     data class Hand(val cards: String, val bid: Int, val score: Long) {}
 
@@ -62,6 +64,11 @@ fun main() {
     check(part2(testInput) == 5905.toLong())
 
     val input = readInput("Day07")
-    part1(input).println() // 248105065
-    part2(input).println() // 249515436
+    measureTime {
+        part1(input).println() // 248105065
+    }.also { it.println() } // 16ms
+
+    measureTime {
+        part2(input).println() // 249515436
+    }.also { it.println() } // 5ms
 }
