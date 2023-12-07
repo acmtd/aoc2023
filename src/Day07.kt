@@ -6,16 +6,8 @@ fun main() {
     fun toHand(data: String, values: Map<Char, Int>): Hand {
         val (cards, bid) = data.split(" ")
 
-        // break down cards into their values and how many of each we have
-        val cardMap: Map<Int, Int> = buildMap {
-            cards.map {
-                val value = values[it]!!
-                if (containsKey(value)) {
-                    put(value, get(value)!! + 1)
-                } else {
-                    put(value, 1)
-                }
-            }
+        val cardMap = buildMap {
+            cards.groupingBy { it }.eachCount().forEach { (key, value) -> put(values[key]!!, value) }
         }
 
         val maxCardsOfOneType = cardMap.filter { it.key > 1 }.maxOfOrNull { it.value } ?: 0
