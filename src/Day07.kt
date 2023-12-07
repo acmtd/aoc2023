@@ -1,43 +1,44 @@
 fun main() {
-    data class Hand(val cards: String, val bid: Int, val valueMap: Map<Int, Int>, val score: Long) {}
-
-    fun valueMap(cards: String, cardValues: Map<Char, Int>): Map<Int, Int> = buildMap {
-        cards.map { lbl ->
-            val value = cardValues[lbl]!!
-            if (containsKey(value)) {
-                put(value, get(value)!! + 1)
-            } else {
-                put(value, 1)
-            }
-        }
-    }
+    data class Hand(val cards: String, val bid: Int, val score: Long) {}
 
     fun toHand(data: String, cardValues: Map<Char, Int>): Hand {
         val (cards, bid) = data.split(" ")
-        val valueMap = valueMap(cards, cardValues)
 
+        // break down cards into their values and how many of each we have
+        val cardMap = buildMap<Int, Int> {
+            cards.map {
+                val value = cardValues[it]!!
+                if (containsKey(value)) {
+                    put(value, get(value)!! + 1)
+                } else {
+                    put(value, 1)
+                }
+            }
+        }
+
+        // the base hand score runs from 50 (five of a kind) down to 10 (all different)
+        // with 35/25 being used for the in between hands (full house, two pair)
         var baseScore: Int
 
         if (cardValues.containsKey('J')) {
-            val maxScoreNonJoker = valueMap.filter { it.key > 1 }.maxOfOrNull { it.value } ?: 0
-            val jokerCount = valueMap[1] ?: 0
+            val maxCardsWithoutJoker = cardMap.filter { it.key > 1 }.maxOfOrNull { it.value } ?: 0
+            val jokerCount = cardMap[1] ?: 0
 
-            baseScore = (maxScoreNonJoker + jokerCount) * 10
+            baseScore = (maxCardsWithoutJoker + jokerCount) * 10
         } else {
-            baseScore = valueMap.maxOf { it.value } * 10
+            baseScore = cardMap.maxOf { it.value } * 10
         }
 
         // full house / two pair adjustment
-        if (valueMap.filter { it.key > 1 && it.value > 1 }.count() > 1) baseScore += 5
+        if (cardMap.filter { it.key > 1 && it.value > 1 }.count() > 1) baseScore += 5
 
-        var tieScore = 0.toLong()
+        // the tie score consists of two digits for each card in the hand, concatenated
+        // adding ten to each card value ensures we have two digits
+        val tieScore = cards.map { lbl -> (cardValues[lbl]!! + 10).toString() }.joinToString("")
 
-        cards.forEach { lbl ->
-            tieScore = tieScore.times(100).plus(10 + cardValues[lbl]!!)
-        }
-
-        val score = "$baseScore$tieScore".toLong()
-        return Hand(cards, bid.toInt(), valueMap, score)
+        // concatenate the base score and tie score and we get an overall score
+        // that can be trivially sorted to put the cards in order
+        return Hand(cards, bid.toInt(), "$baseScore$tieScore".toLong())
     }
 
     fun calculate(input: List<String>, labels: String): Long {
