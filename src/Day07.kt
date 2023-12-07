@@ -56,7 +56,7 @@ fun main() {
     }
 
     fun part2(input: List<String>): Long {
-        return calculate(input, "AKQJT98765432J")
+        return calculate(input, "AKQ_T98765432J")
     }
 
     val testInput = readInput("Day07_test")
