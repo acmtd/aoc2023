@@ -18,21 +18,15 @@ fun main() {
             }
         }
 
-        // the base hand score runs from 50 (five of a kind) down to 10 (all different)
-        // with 35/25 being used for the in between hands (full house, two pair)
-        var baseScore: Int
-
-        if (cardValues.containsKey('J')) {
-            val maxCardsWithoutJoker = cardMap.filter { it.key > 1 }.maxOfOrNull { it.value } ?: 0
-            val jokerCount = cardMap[1] ?: 0
-
-            baseScore = (maxCardsWithoutJoker + jokerCount) * 10
-        } else {
-            baseScore = cardMap.maxOf { it.value } * 10
-        }
-
         // full house / two pair adjustment
-        if (cardMap.filter { it.key > 1 && it.value > 1 }.count() > 1) baseScore += 5
+        val bonus = cardMap.filter { it.key > 1 && it.value > 1 }.count().takeIf { it > 1 } ?: 0
+
+        // the base hand score runs from 50 (five of a kind) down to 10 (all different)
+        // with a bonus added for the in between hands (full house, two pair)
+        val maxCardsOfOneType = cardMap.filter { it.key > 1 }.maxOfOrNull { it.value } ?: 0
+        val jokerCount = cardMap[1] ?: 0
+
+        val baseScore = (maxCardsOfOneType + jokerCount) * 10 + bonus
 
         // the tie score consists of two digits for each card in the hand, concatenated
         // adding ten to each card value ensures we have two digits
