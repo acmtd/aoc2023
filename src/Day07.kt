@@ -2,6 +2,7 @@ import kotlin.time.measureTime
 
 fun main() {
     data class Hand(val cards: String, val bid: Int, val score: Long)
+    fun notJoker(it: Map.Entry<Int, Int>) = it.key > 1
 
     fun toHand(data: String, values: Map<Char, Int>): Hand {
         val (cards, bid) = data.split(" ")
@@ -11,13 +12,13 @@ fun main() {
             cards.groupingBy { it }.eachCount().forEach { (key, value) -> put(values[key]!!, value) }
         }
 
-        val maxNonJokerCards = cardMap.filter { it.key > 1 }.maxOfOrNull { it.value } ?: 0
+        val maxNonJokerCards = cardMap.filter { notJoker(it) }.maxOfOrNull { it.value } ?: 0
         val jokerCount = cardMap[1] ?: 0
 
         // The base hand score is the maximum number of cards of one type multiplied by ten
         // with a two point bonus added for the hands with more than one pair (full house, two pair).
         // Gives possible scores of 50 (5K), 40 (4K), 32 (FH), 30 (3K), 22 (2P), 20 (2K), 10 (HC)
-        val bonus = cardMap.filter { it.key > 1 && it.value in (2..3) }.count().takeIf { it == 2 } ?: 0
+        val bonus = cardMap.filter { notJoker(it) && it.value in (2..3) }.count().takeIf { it == 2 } ?: 0
         val baseScore = (maxNonJokerCards + jokerCount) * 10 + bonus
 
         // The tie-breaker score consists of two digits for each card in the hand, concatenated
