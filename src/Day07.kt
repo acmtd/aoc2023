@@ -1,13 +1,13 @@
 import kotlin.time.measureTime
 
 fun main() {
-    data class Hand(val cards: String, val bid: Int, val score: Long) {}
+    data class Hand(val cards: String, val bid: Int, val score: Long)
 
     fun toHand(data: String, values: Map<Char, Int>): Hand {
         val (cards, bid) = data.split(" ")
 
         // break down cards into their values and how many of each we have
-        val cardMap = buildMap<Int, Int> {
+        val cardMap: Map<Int, Int> = buildMap {
             cards.map {
                 val value = values[it]!!
                 if (containsKey(value)) {
@@ -40,7 +40,7 @@ fun main() {
 
         return input.map { toHand(it, values) }.sortedBy { it.score }
             .mapIndexed { index, hand -> hand.bid * (1 + index) }
-            .sumOf { it -> it.toLong() }
+            .sumOf { it.toLong() }
     }
 
     fun part1(input: List<String>): Long = calculate(input, "AKQJT98765432")
