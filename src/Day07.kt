@@ -28,21 +28,21 @@ fun main() {
         return Hand(cards, bid.toInt(), "$baseScore$tieScore".toLong())
     }
 
-    fun calculate(input: List<String>, labels: String): Long {
+    fun calculate(input: List<String>, labels: String): Int {
         // map each card letter to a number from 14 (Ace) down to 1 (Joker)
         val values = labels.withIndex().associate { (idx, lbl) -> lbl to 14 - idx }
 
         return input.map { toHand(it, values) }.sortedBy { it.score }
             .mapIndexed { index, hand -> hand.bid * (1 + index) }
-            .sumOf { it.toLong() }
+            .sum()
     }
 
-    fun part1(input: List<String>): Long = calculate(input, "AKQJT98765432")
-    fun part2(input: List<String>): Long = calculate(input, "AKQ_T98765432J")
+    fun part1(input: List<String>): Int = calculate(input, "AKQJT98765432")
+    fun part2(input: List<String>): Int = calculate(input, "AKQ_T98765432J")
 
     val testInput = readInput("Day07_test")
-    check(part1(testInput) == 6440.toLong())
-    check(part2(testInput) == 5905.toLong())
+    check(part1(testInput) == 6440)
+    check(part2(testInput) == 5905)
 
     val input = readInput("Day07")
     measureTime {
