@@ -25,7 +25,7 @@ fun main() {
         var curNode = startNode
 
         while (!curNode.name.endsWith(nodeEndsWith)) {
-            curNode = nodeMap[nextNodeName(nextDirection(step, directions), curNode)]!!
+            curNode = nodeMap.getValue(nextNodeName(nextDirection(step, directions), curNode))
             step++
         }
 
@@ -39,14 +39,14 @@ fun main() {
         val nodeMap = nodesText.split("\n").map { it.makeNode() }.associateBy { it.name }
 
         if (part1) {
-            nodeMap["AAA"]?.let { return getStepCount(it, "ZZZ", directions, nodeMap).toLong() } ?: return 0
+            nodeMap.getValue("AAA").let { return getStepCount(it, "ZZZ", directions, nodeMap).toLong() }
         } else {
             // find distance for each individual start node to reach a Z node
             val distances = nodeMap.filter { it.key.endsWith("A") }.values
                 .map { node -> getStepCount(node, "Z", directions, nodeMap) }
 
             // need to use least common multiple to find the shared distance that leads all start nodes to a Z at the same time
-            return distances.map { it.toLong() }.reduce { acc, next -> lcm(acc, next) }
+            return distances.map { it.toLong() }.reduce { acc, next -> lcm(acc, next).toLong() }
         }
     }
 
@@ -63,9 +63,9 @@ fun main() {
 
     measureTime {
         part1(input).println() // 22357
-    }.also { it.println() } // 6ms
+    }.also { it.println() } // 8ms
 
     measureTime {
         part2(input).println() // 10371555451871
-    }.also { it.println() } // 10ms
+    }.also { it.println() } // 8ms
 }
