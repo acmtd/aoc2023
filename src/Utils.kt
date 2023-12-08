@@ -26,6 +26,22 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
  */
 fun Any?.println() = println(this)
 
+
+fun lcm(n1: Long, n2: Long): Long {
+    var gcd = 1.toLong()
+    var i = 1.toLong()
+
+    while (i <= n1 && i <= n2) {
+        // Checks if i is factor of both integers
+        if (n1 % i == 0.toLong() && n2 % i == 0.toLong())
+            gcd = i
+        ++i
+    }
+
+    return n1 * n2 / gcd
+}
+
 data class Position(val row: Int, val col: Int) {
-    fun isAdjacent(otherPos: Position) = ((row - otherPos.row).absoluteValue <= 1) && ((col - otherPos.col).absoluteValue <= 1)
+    fun isAdjacent(otherPos: Position) =
+        ((row - otherPos.row).absoluteValue <= 1) && ((col - otherPos.col).absoluteValue <= 1)
 }

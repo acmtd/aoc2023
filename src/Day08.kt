@@ -20,11 +20,11 @@ fun main() {
 
     fun nextDirection(step: Int, directions: CharArray): Char = directions[step.mod(directions.size)]
 
-    fun getStepCount(startNode: Node, endNodeName: String, directions: CharArray, nodeMap: Map<String, Node>): Int {
+    fun getStepCount(startNode: Node, nodeEndsWith: String, directions: CharArray, nodeMap: Map<String, Node>): Int {
         var step = 0
         var curNode = startNode
 
-        while (curNode.name != endNodeName) {
+        while (!curNode.name.endsWith(nodeEndsWith)) {
             curNode = nodeMap[nextNodeName(nextDirection(step, directions), curNode)]!!
             step++
         }
@@ -32,24 +32,40 @@ fun main() {
         return step
     }
 
-    fun part1(blocks: List<String>): Int {
+    fun calculate(blocks: List<String>, part1: Boolean): Long {
         val (directionsText, nodesText) = blocks
 
         val directions = directionsText.toCharArray()
         val nodeMap = nodesText.split("\n").map { it.makeNode() }.associateBy { it.name }
 
-        nodeMap["AAA"]?.let { return getStepCount(it, "ZZZ", directions, nodeMap) }
+        if (part1) {
+            nodeMap["AAA"]?.let { return getStepCount(it, "ZZZ", directions, nodeMap).toLong() } ?: return 0
+        } else {
+            // find distance for each individual start node to reach a Z node
+            val distances = nodeMap.filter { it.key.endsWith("A") }.values
+                .map { node -> getStepCount(node, "Z", directions, nodeMap) }
 
-        return 0
+            // need to use least common multiple to find the shared distance that leads all start nodes to a Z at the same time
+            return distances.map { it.toLong() }.reduce { acc, next -> lcm(acc, next) }
+        }
     }
 
+    fun part1(blocks: List<String>) = calculate(blocks, true)
+    fun part2(blocks: List<String>) = calculate(blocks, false)
 
     val testInput = File("data", "Day08_test.txt").readText().split("\n\n")
-    check(part1(testInput) == 2)
+    check(part1(testInput) == 2.toLong())
+
+    val testInput2 = File("data", "Day08_test2.txt").readText().split("\n\n")
+    check(part2(testInput2) == 6.toLong())
 
     val input = File("data", "Day08.txt").readText().split("\n\n")
 
     measureTime {
         part1(input).println() // 22357
-    }.also { it.println() } // 7ms
+    }.also { it.println() } // 6ms
+
+    measureTime {
+        part2(input).println() // 10371555451871
+    }.also { it.println() } // 10ms
 }
