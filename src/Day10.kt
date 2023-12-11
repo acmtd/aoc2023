@@ -1,80 +1,55 @@
 fun main() {
+    fun Char.canBeReachedFrom(direction: Char): Boolean {
+        return when (this) {
+            '.' -> false
+            'S' -> true
+            '|' -> (direction == 'N' || direction == 'S')
+            '-' -> (direction == 'E' || direction == 'W')
+            'L' -> (direction == 'S' || direction == 'W')
+            'J' -> (direction == 'S' || direction == 'E')
+            'F' -> (direction == 'N' || direction == 'W')
+            '7' -> (direction == 'N' || direction == 'E')
+            else -> false
+        }
+    }
+
     data class Position(val row: Int, val col: Int)
 
-    data class State(val pos: Position,
-                     val direction: Char, val symbol: Char) {
-
+    data class State(val pos: Position, val direction: Char, val symbol: Char) {
         fun getNextLegalStates(grid: Array<CharArray>): List<State> {
             return buildList {
-                if (pos.row > 0) {
+                if (pos.row > 0)
                     add(State(Position(pos.row - 1, pos.col), 'N', grid[pos.row - 1][pos.col]))
-                }
-                if (pos.col > 0) {
+                if (pos.col > 0)
                     add(State(Position(pos.row, pos.col - 1), 'W', grid[pos.row][pos.col - 1]))
-                }
-                if (pos.row < grid.lastIndex) {
+                if (pos.row < grid.lastIndex)
                     add(State(Position(pos.row + 1, pos.col), 'S', grid[pos.row + 1][pos.col]))
-                }
-                if (pos.col < grid.first().lastIndex) {
+                if (pos.col < grid.first().lastIndex)
                     add(State(Position(pos.row, pos.col + 1), 'E', grid[pos.row][pos.col + 1]))
-                }
             }.filter { pos -> pos.symbol.canBeReachedFrom(pos.direction) }
         }
 
-        fun transformLocation(): State {
-            return State(pos, this.newDirection(), this.symbol)
-        }
-
-        fun newDirection(): Char {
-            // if it's a corner, flip the direction
-            if (symbol == 'L') {
-                if (this.direction == 'S') return 'E'
-                return 'N'
+        fun transformLocation() = State(pos, this.newDirection(), this.symbol)
+        fun newDirection() =
+            when (symbol) {
+                'L' -> if (direction == 'S') 'E' else 'N'
+                'F' -> if (direction == 'N') 'E' else 'S'
+                '7' -> if (direction == 'E') 'S' else 'E'
+                'J' -> if (direction == 'S') 'W' else 'N'
+                else -> direction
             }
-
-            if (symbol == 'F') {
-                if (this.direction == 'N') return 'E'
-                return 'S'
-            }
-
-            if (symbol == '7') {
-                if (this.direction == 'E') return 'S'
-                return 'E'
-            }
-
-            if (symbol == 'J') {
-                if (this.direction == 'S') return 'W'
-                return 'N'
-            }
-
-            return this.direction
-        }
     }
 
     data class Route(val states: List<State>)
 
     fun visualize(grid: Array<CharArray>, polygon: List<Position>, inside: List<Position>, outside: List<Position>) {
-
         for ((row, line) in grid.withIndex()) {
             for ((col, symbol) in line.withIndex()) {
-                val p = Position(row, col)
-
-                when (p) {
-                    in polygon -> {
-                        print(symbol)
-                    }
-
-                    in inside -> {
-                        print("I")
-                    }
-
-                    in outside -> {
-                        print("O")
-                    }
-
-                    else -> {
-                        print(grid[row][col])
-                    }
+                when (Position(row, col)) {
+                    in polygon -> print(symbol)
+                    in inside -> print("I")
+                    in outside -> print("O")
+                    else -> print(grid[row][col])
                 }
             }
 
@@ -114,12 +89,11 @@ fun main() {
             val possibleMovesUnfiltered = state.getNextLegalStates(grid)
 
             val possibleMoves = possibleMovesUnfiltered
-                    .filter { s -> !rte.states.map { it.pos }.contains(s.pos) }
+                .filter { s -> !rte.states.map { it.pos }.contains(s.pos) }
 
             // if there are no possible moves left, check if a move to the starting position is possible
-            if (possibleMoves.isEmpty() && possibleMovesUnfiltered.any { it.pos == startState.pos }) {
+            if (possibleMoves.isEmpty() && possibleMovesUnfiltered.any { it.pos == startState.pos })
                 return rte
-            }
 
             val nextRoutes = possibleMoves.map {
                 buildList {
@@ -146,24 +120,30 @@ fun main() {
 
         calculateRoute(grid, startState)?.let { rte ->
             // these are the coordinates of the outside of our polygon
-            val positions = rte.states.map { s -> s.pos }
+            val polygonPoints = rte.states.map { s -> s.pos }
 
-            println("Calculating inside/outside polygon for ${positions.size} point polygon")
+            println("Calculating inside/outside polygon for ${polygonPoints.size} point polygon")
 
             val insidePositions = mutableListOf<Position>()
             val outsidePositions = mutableListOf<Position>()
 
+            // draw a line from outside the polygon to the point, work out
+            // how many times it intersects the polygon: odd=inside polygon, even=outside
+            //
+            // I'm still trying to convince myself why J and L should be included
+            // but S and F should not, other than it makes the test case work
+            // and produces the right output for the full input data
             for ((row, line) in grid.withIndex()) {
-                var verticalBars = 0
+                var intersections = 0
 
                 for ((col, symbol) in line.withIndex()) {
-                    // consider any position that isn't part of the main loop
-                    // to have the potential to be inside the main loop
                     val pos = Position(row, col)
-                    if (pos in positions) {
-                        if (grid[row][col] in listOf('|', 'J', 'L')) verticalBars++
+
+                    if (pos in polygonPoints) {
+                        // this is a polygon point, if vertical bar or J/L then increment intersections
+                        if (symbol in listOf('|', 'J', 'L')) intersections++
                     } else {
-                        if (verticalBars % 2 == 1) {
+                        if (intersections % 2 == 1) {
                             insidePositions.add(pos)
                         } else {
                             outsidePositions.add(pos)
@@ -172,7 +152,7 @@ fun main() {
                 }
             }
 
-            visualize(grid, positions, insidePositions, outsidePositions)
+            visualize(grid, polygonPoints, insidePositions, outsidePositions)
             return insidePositions.size
         } ?: return 0
     }
@@ -195,22 +175,4 @@ fun main() {
     val input = readInput("Day10")
     part1(input).println() // 6754
     part2(input).println() // 567
-}
-
-private fun Char.canBeReachedFrom(direction: Char): Boolean {
-    if (this == '.') return false // cannot travel to a ground position
-
-    if (this == 'S') return true
-
-    if (direction == '.') return true
-
-    if (this == '|') return (direction == 'N' || direction == 'S')
-    if (this == '-') return (direction == 'E' || direction == 'W')
-
-    if (this == 'L') return (direction == 'S' || direction == 'W')
-    if (this == 'J') return (direction == 'S' || direction == 'E')
-    if (this == 'F') return (direction == 'N' || direction == 'W')
-    if (this == '7') return (direction == 'N' || direction == 'E')
-
-    return false
 }
