@@ -28,9 +28,6 @@ fun main() {
     fun calculate(input: List<String>, expansionCoefficient: Int): Long {
         val (grid, galaxyPositions) = makeGrid(input)
 
-        val emptyRows = emptyRowIndices(grid)
-        val emptyCols = emptyColIndices(grid)
-
         val pairs = buildList {
             for ((idx1, p1) in galaxyPositions.withIndex()) {
                 for ((idx2, p2) in galaxyPositions.withIndex()) {
@@ -39,6 +36,9 @@ fun main() {
             }
         }
 
+        val emptyRows = emptyRowIndices(grid)
+        val emptyCols = emptyColIndices(grid)
+
         return pairs.sumOf { (g1, g2) ->
             val rowRange = if (g1.row > g2.row) g2.row..g1.row else g1.row..g2.row
             val colRange = if (g1.col > g2.col) g2.col..g1.col else g1.col..g2.col
@@ -46,15 +46,14 @@ fun main() {
             val rowDiff = rowRange.count() - 1
             val colDiff = colRange.count() - 1
 
-            // expansion coefficent is how many rows a single row turns into. So minus 1
-            // to get the number of ADDED rows
+            // expansion coefficent is how many rows a single row turns into.
+            // Subtract 1 to get the number of ADDED rows
             val rowsAdded = (expansionCoefficient - 1) * emptyRows.count { it in rowRange }
             val colsAdded = (expansionCoefficient - 1) * emptyCols.count { it in colRange }
 
             (rowDiff + colDiff + rowsAdded + colsAdded).toLong()
         }
     }
-
 
     val testInput = readInput("Day11_test")
     check(calculate(testInput, 2) == 374.toLong())
@@ -63,5 +62,5 @@ fun main() {
 
     val input = readInput("Day11")
     calculate(input, 2).println() // Part 1: 9274989
-    calculate(input, 1000000).println() // Part 2: 652275169 is too low
+    calculate(input, 1000000).println() // Part 2: 357134560737
 }
