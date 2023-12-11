@@ -30,6 +30,7 @@ fun main() {
         }
 
         fun transformLocation() = State(pos, this.newDirection(), this.symbol)
+
         fun newDirection() =
             when (symbol) {
                 'L' -> if (direction == 'S') 'E' else 'N'
@@ -46,10 +47,9 @@ fun main() {
         for ((row, line) in grid.withIndex()) {
             for ((col, symbol) in line.withIndex()) {
                 when (Position(row, col)) {
-                    in polygon -> print(symbol)
                     in inside -> print("I")
                     in outside -> print("O")
-                    else -> print(grid[row][col])
+                    else -> print(symbol)
                 }
             }
 
@@ -69,7 +69,7 @@ fun main() {
             for ((col, character) in line.withIndex()) {
                 grid[row][col] = character
 
-                if (character == 'S') startPos = State(Position(row, col), '.', grid[row][col])
+                if (character == 'S') startPos = State(Position(row, col), '.', 'S')
             }
         }
 
