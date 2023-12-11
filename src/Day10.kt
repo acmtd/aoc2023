@@ -32,13 +32,13 @@ fun main() {
         fun transformLocation() = State(pos, this.newDirection(), this.symbol)
 
         fun newDirection() =
-            when (symbol) {
-                'L' -> if (direction == 'S') 'E' else 'N'
-                'F' -> if (direction == 'N') 'E' else 'S'
-                '7' -> if (direction == 'E') 'S' else 'E'
-                'J' -> if (direction == 'S') 'W' else 'N'
-                else -> direction
-            }
+                when (symbol) {
+                    'L' -> if (direction == 'S') 'E' else 'N'
+                    'F' -> if (direction == 'N') 'E' else 'S'
+                    '7' -> if (direction == 'E') 'S' else 'E'
+                    'J' -> if (direction == 'S') 'W' else 'N'
+                    else -> direction
+                }
     }
 
     data class Route(val states: List<State>)
@@ -89,7 +89,7 @@ fun main() {
             val possibleMovesUnfiltered = state.getNextLegalStates(grid)
 
             val possibleMoves = possibleMovesUnfiltered
-                .filter { s -> !rte.states.map { it.pos }.contains(s.pos) }
+                    .filter { s -> !rte.states.map { it.pos }.contains(s.pos) }
 
             // if there are no possible moves left, check if a move to the starting position is possible
             if (possibleMoves.isEmpty() && possibleMovesUnfiltered.any { it.pos == startState.pos })
@@ -130,9 +130,12 @@ fun main() {
             // draw a line from outside the polygon to the point, work out
             // how many times it intersects the polygon: odd=inside polygon, even=outside
             //
-            // I'm still trying to convince myself why J and L should be included
-            // but S and F should not, other than it makes the test case work
-            // and produces the right output for the full input data
+            // this will always include crossings of vertical bars, plus
+            // *either* L and J, *or* 7 and F, depending on an arbitrary decision
+            // on where to place the point vertically.
+            //
+            // The Advent of Code in Kotlin Day 10 youtube stream has a great explanation
+            // of this (thanks Sebastian)
             for ((row, line) in grid.withIndex()) {
                 var intersections = 0
 
@@ -141,7 +144,9 @@ fun main() {
 
                     if (pos in polygonPoints) {
                         // this is a polygon point, if vertical bar or J/L then increment intersections
+                        // alternatively can use F/7, plus S because in our case that's a substitute for F
                         if (symbol in listOf('|', 'J', 'L')) intersections++
+//                        if (symbol in listOf('|', 'F', '7', 'S')) intersections++ // alt method, same result
                     } else {
                         if (intersections % 2 == 1) {
                             insidePositions.add(pos)
