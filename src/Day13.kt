@@ -1,5 +1,6 @@
 import java.io.File
 import kotlin.math.min
+import kotlin.time.measureTime
 
 fun main() {
     fun rowsAndCols(pattern: String): Pair<List<String>, List<String>> {
@@ -91,8 +92,14 @@ fun main() {
     val input = File("data", "Day13.txt").readText().split("\n\n")
 
     check(part1(testInput) == 405)
-    println(part1(input)) // 35691
+
+    measureTime {
+        part1(input).println() // 35691
+    }.also { it.println() } // 14ms
 
     check(part2(testInput) == 400)
-    println(part2(input)) // 39037
+
+    measureTime {
+        part2(input).println() // 39037
+    }.also { it.println() } // 5ms
 }
