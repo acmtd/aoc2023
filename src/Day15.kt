@@ -14,24 +14,20 @@ fun main() {
     }
 
     fun part2(input: String): Int {
-        val instructions = input.split(",")
+        val map = hashMapOf<Int, MutableList<Lens>>()
 
-        val boxToLensesMap = hashMapOf<Int, MutableList<Lens>>()
+        input.split(",").forEach { instruction ->
+            val (label, focalLength) = instruction.split("-", "=")
+            val boxNumber = hash(label)
 
-        instructions.forEach { instruction ->
-            if (instruction.endsWith("-")) {
+            if (focalLength.isEmpty()) {
                 // go to the relevant box and remove the lens with the given label, IF present in the box
-                val label = instruction.removeSuffix("-")
-                val boxNumber = hash(label)
-                boxToLensesMap[boxNumber]?.let { lenses -> lenses.removeIf { it.label == label } }
+                map[boxNumber]?.let { lenses -> lenses.removeIf { it.label == label } }
             } else {
-                val (label, focalLength) = instruction.split("=")
-                val boxNumber = hash(label)
-
                 val newLens = Lens(label, focalLength.toInt())
 
-                if (boxToLensesMap.containsKey(boxNumber)) {
-                    boxToLensesMap[boxNumber]?.let { lenses ->
+                if (map.containsKey(boxNumber)) {
+                    map[boxNumber]?.let { lenses ->
                         lenses.find { it.label == label }?.let {
                             // if this label is in the box, update the focal length
                             it.focalLength = focalLength.toInt()
@@ -41,12 +37,12 @@ fun main() {
                         }
                     }
                 } else {
-                    boxToLensesMap[boxNumber] = mutableListOf(newLens)
+                    map[boxNumber] = mutableListOf(newLens)
                 }
             }
         }
 
-        return boxToLensesMap.flatMap { (box, lenses) ->
+        return map.flatMap { (box, lenses) ->
             lenses.mapIndexed { idx, lens -> (box + 1) * (idx + 1) * lens.focalLength }
         }.sum()
     }
@@ -65,5 +61,5 @@ fun main() {
 
     measureTime {
         part2(input).println() // 269747
-    }.also { it.println() }  // 9ms
+    }.also { it.println() }  // 17ms
 }
