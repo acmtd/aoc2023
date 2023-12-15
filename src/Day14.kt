@@ -93,6 +93,6 @@ fun main() {
     check(part2(testInput) == 64)
 
     measureTime {
-        part2(input).println() // 104619 is too low
+        part2(input).println() // 104619
     }.also { it.println() } // 1.2s
 }
