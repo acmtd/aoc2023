@@ -83,21 +83,13 @@ fun main() {
 
         val startStates = buildSet {
             grid.indices.forEach { row ->
-                grid.first().indices.forEach { col ->
-                    if (row == 0 || row == grid.size - 1 || col == 0 || col == grid.first().size - 1) {
-                        val pos = Position(row, col)
+                add(State(Position(row, 0), Direction(0, 1)))
+                add(State(Position(row, grid.first().size - 1), Direction(0, -1)))
+            }
 
-                        if (row == 0) {
-                            add(State(pos, Direction(1, 0)))
-                        } else if (col == 0) {
-                            add(State(pos, Direction(0, 1)))
-                        } else if (row == grid.size - 1) {
-                            add(State(pos, Direction(-1, 0)))
-                        } else {
-                            add(State(pos, Direction(0, -1)))
-                        }
-                    }
-                }
+            grid.first().indices.forEach {col ->
+                add(State(Position(0, col), Direction(1, 0)))
+                add(State(Position(grid.size-1, col), Direction(-1, 0)))
             }
         }
 
@@ -127,5 +119,5 @@ fun main() {
 
     measureTime {
         part2(input).println() // 7488
-    }.also { it.println() }  // 476ms -> 406ms with coroutines
+    }.also { it.println() }  // 380ms with coroutines
 }
