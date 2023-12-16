@@ -1,3 +1,4 @@
+import kotlinx.coroutines.*
 import kotlin.time.measureTime
 
 fun main() {
@@ -76,7 +77,7 @@ fun main() {
         return sendBeam(state, makeGrid(input))
     }
 
-    fun part2(input: List<String>): Int {
+    suspend fun calculatePart2(input: List<String>): Int {
         // basically part 1 again but need to test all possible edge positions
         val grid = makeGrid(input)
 
@@ -100,7 +101,17 @@ fun main() {
             }
         }
 
-        return startStates.maxOfOrNull { state -> sendBeam(state, grid) }!!
+        return coroutineScope {
+            startStates.map { state ->
+                async {
+                    sendBeam(state, grid)
+                }
+            }.awaitAll()
+        }.max()
+    }
+
+    fun part2(input: List<String>): Int {
+        return runBlocking { calculatePart2(input) }
     }
 
     val testInput = readInput("Day16_test")
@@ -110,11 +121,11 @@ fun main() {
 
     measureTime {
         part1(input).println() // 6994
-    }.also { it.println() } // 14ms
+    }.also { it.println() } // 12ms
 
     check(part2(testInput) == 51)
 
     measureTime {
         part2(input).println() // 7488
-    }.also { it.println() }  // 476ms
+    }.also { it.println() }  // 476ms -> 406ms with coroutines
 }
