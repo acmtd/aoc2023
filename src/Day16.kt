@@ -22,7 +22,7 @@ fun main() {
     }
 
     fun isOutOfBounds(pos: Position, grid: Array<CharArray>) =
-            (pos.col < 0 || pos.row < 0 || pos.col >= grid.first().size || pos.row >= grid.size)
+        (pos.col < 0 || pos.row < 0 || pos.col >= grid.first().size || pos.row >= grid.size)
 
     fun nextStates(state: State, grid: Array<CharArray>): List<State> {
         return buildList {
@@ -77,7 +77,7 @@ fun main() {
         return sendBeam(state, makeGrid(input))
     }
 
-    suspend fun calculatePart2(input: List<String>): Int {
+    fun calculatePart2(input: List<String>): Int {
         // basically part 1 again but need to test all possible edge positions
         val grid = makeGrid(input)
 
@@ -87,23 +87,21 @@ fun main() {
                 add(State(Position(row, grid.first().size - 1), Direction(0, -1)))
             }
 
-            grid.first().indices.forEach {col ->
+            grid.first().indices.forEach { col ->
                 add(State(Position(0, col), Direction(1, 0)))
-                add(State(Position(grid.size-1, col), Direction(-1, 0)))
+                add(State(Position(grid.size - 1, col), Direction(-1, 0)))
             }
         }
 
-        return coroutineScope {
+        return runBlocking {
             startStates.map { state ->
-                async {
-                    sendBeam(state, grid)
-                }
+                async(Dispatchers.Default) { sendBeam(state, grid) }
             }.awaitAll()
         }.max()
     }
 
     fun part2(input: List<String>): Int {
-        return runBlocking { calculatePart2(input) }
+        return calculatePart2(input)
     }
 
     val testInput = readInput("Day16_test")
@@ -119,5 +117,5 @@ fun main() {
 
     measureTime {
         part2(input).println() // 7488
-    }.also { it.println() }  // 380ms with coroutines
+    }.also { it.println() }  // 300ms with coroutines
 }
